@@ -1,16 +1,41 @@
-# React + Vite
+# Gerador de Documentos — LORD POLÍMEROS
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Ferramenta interna de vendas: monta pedidos e orçamentos comerciais de resina no
+padrão visual da LORD POLÍMEROS e gera o PDF em segundos (impressão nativa em
+A4 paisagem, `Ctrl/⌘ + Enter` para gerar, `Esc` para voltar ao formulário).
 
-Currently, two official plugins are available:
+Site estático puro — `index.html` é o app inteiro (HTML/CSS/JS, sem framework,
+sem dependência de build para rodar). `vite` é usado só como servidor de
+desenvolvimento e para publicar `/public` num host estático.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Rodar localmente
 
-## React Compiler
+```bash
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Publicar
 
-## Expanding the Oxlint configuration
+```bash
+npm run build
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+Gera `dist/` pronto para qualquer hospedagem estática (Vercel, Netlify, etc.).
+Este repositório está conectado ao Vercel — todo push em `master` já publica
+automaticamente.
+
+## Estrutura
+
+- `index.html` — app completo (formulário, painel de peso ao vivo, geração do
+  documento, impressão)
+- `public/lord-branca.png`, `public/lord-azul.png` — logo oficial (branca para
+  fundos escuros, azul para fundos claros)
+- `public/favicon.svg` — ícone da aba do navegador
+
+## Regras de cálculo
+
+- `subtotal = quantidade × valor por kg`
+- `IPI = subtotal × IPI%`
+- `total com IPI = subtotal + IPI`
+- `ICMS = subtotal × ICMS%` — informativo, nunca somado ao total
