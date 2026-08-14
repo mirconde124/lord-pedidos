@@ -1,13 +1,1055 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gerador de Pedidos — LORD POLÍMEROS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gerador de Documentos — LORD POLÍMEROS</title>
+<meta name="description" content="Monte pedidos e orçamentos de resinas no padrão LORD POLÍMEROS e gere o PDF em segundos.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A1526;
+    --ink-2:#12203A;
+    --ink-3:#1E3357;
+    --paper:#F3F5F9;
+    --card:#FFFFFF;
+    --mist:#E4E9F2;
+    --line:#D7DEEA;
+    --text:#0E1A2B;
+    --muted:#64748B;
+    --blue:#1D4ED8;
+    --blue-br:#3B82F6;
+    --melt:#F2A33C;
+    --ok:#10B981;
+    --danger:#DC2626;
+    --r:14px;
+    --shadow:0 1px 2px rgba(10,21,38,.06), 0 12px 32px -18px rgba(10,21,38,.35);
+    --display:'Archivo', system-ui, sans-serif;
+    --body:'Inter', system-ui, sans-serif;
+    --mono:'IBM Plex Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--text);
+    font-family:var(--body);
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  body.is-locked{overflow:hidden}
+  button{font:inherit;cursor:pointer}
+  input,select,textarea{font:inherit;color:inherit}
+  :focus-visible{outline:2px solid var(--blue-br);outline-offset:2px;border-radius:6px}
+
+  /* ---------- topo ---------- */
+  .topbar{
+    background:var(--ink);
+    color:#fff;
+    border-bottom:1px solid rgba(255,255,255,.08);
+  }
+  .topbar-in{
+    max-width:1320px;margin:0 auto;padding:16px 24px;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  /* logo */
+  .logo{display:block;background-repeat:no-repeat;background-position:left center;background-size:contain;flex:none}
+  .logo-w{background-image:url("data:image/png;base64,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")}
+  .lockup{display:flex;align-items:center;gap:12px}
+  .lockup .bar{width:1px;align-self:stretch;background:currentColor;opacity:.28}
+  .lockup .word{
+    font-family:var(--display);font-weight:600;font-size:12px;
+    letter-spacing:.3em;text-transform:uppercase;line-height:1;padding-top:2px;
+  }
+
+  .brand{display:flex;align-items:center;gap:14px;margin-right:auto;color:#fff}
+  .brand .logo{width:104px;height:22px}
+  .brand p{margin:0;font-size:12.5px;color:#93A4BF;padding-left:14px;border-left:1px solid rgba(255,255,255,.16)}
+
+  .segmented{
+    display:flex;gap:4px;padding:4px;border-radius:999px;
+    background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.09);
+  }
+  .segmented button{
+    border:0;background:transparent;color:#B7C4D9;
+    padding:8px 20px;border-radius:999px;
+    font-family:var(--display);font-weight:600;font-size:13px;
+    letter-spacing:.06em;text-transform:uppercase;
+    transition:background .18s ease,color .18s ease;
+  }
+  .segmented button[aria-pressed="true"]{background:#fff;color:var(--ink)}
+  .segmented button:hover:not([aria-pressed="true"]){color:#fff}
+
+  .ghost{
+    border:1px solid rgba(255,255,255,.18);background:transparent;color:#D5DEEC;
+    padding:9px 16px;border-radius:999px;font-size:13px;font-weight:500;
+    transition:background .18s ease,border-color .18s ease;
+  }
+  .ghost:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35)}
+
+  /* ---------- layout ---------- */
+  .wrap{
+    max-width:1320px;margin:0 auto;padding:28px 24px 140px;
+    display:grid;grid-template-columns:minmax(0,1fr) 372px;gap:24px;align-items:start;
+  }
+  .intro{grid-column:1 / -1;display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:2px}
+  .intro h2{
+    margin:0;font-family:var(--display);font-weight:800;font-size:clamp(26px,3.4vw,38px);
+    letter-spacing:-.02em;line-height:1.05;
+  }
+  .intro p{margin:6px 0 0;color:var(--muted);max-width:52ch}
+  .stamp{
+    font-family:var(--mono);font-size:12px;color:var(--muted);
+    border:1px dashed var(--line);border-radius:999px;padding:7px 14px;background:#fff;
+  }
+
+  .panel{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:var(--shadow);margin-top:22px;overflow:hidden;
+  }
+  .panel-head{
+    display:flex;align-items:center;gap:12px;
+    padding:16px 20px;border-bottom:1px solid var(--mist);
+  }
+  .panel-head h3{
+    margin:0;font-family:var(--display);font-weight:700;font-size:12.5px;
+    letter-spacing:.16em;text-transform:uppercase;
+  }
+  .step{
+    font-family:var(--mono);font-size:11px;color:var(--blue);
+    background:#EAF1FE;border-radius:6px;padding:3px 8px;flex:none;
+  }
+  .panel-body{padding:20px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .field{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .field label{
+    font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  }
+  .field label .req{color:var(--blue)}
+  .field .hint{font-size:12px;color:var(--muted)}
+  .control{
+    width:100%;background:#FBFCFE;border:1px solid var(--line);border-radius:10px;
+    padding:11px 13px;transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
+  }
+  .control:hover{border-color:#BFCBDD}
+  .control:focus{
+    outline:none;background:#fff;border-color:var(--blue-br);
+    box-shadow:0 0 0 3px rgba(59,130,246,.16);
+  }
+  .control::placeholder{color:#9AA7BB}
+  select.control{appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round'><path d='M5 9l7 7 7-7'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
+  }
+  textarea.control{min-height:92px;resize:vertical}
+  .num{font-family:var(--mono);letter-spacing:-.01em}
+  .invalid{border-color:var(--danger)!important;box-shadow:0 0 0 3px rgba(220,38,38,.12)!important}
+  .err{display:none;font-size:12.5px;color:var(--danger);font-weight:500}
+  .err.show{display:block}
+
+  /* ---------- materiais ---------- */
+  .mat-list{display:flex;flex-direction:column;gap:14px}
+  .mat{
+    border:1px solid var(--line);border-radius:12px;background:#FBFCFE;overflow:hidden;
+    animation:pop .22s ease-out;
+  }
+  @keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+  .mat-top{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;
+    background:#fff;border-bottom:1px solid var(--mist);
+  }
+  .mat-idx{
+    font-family:var(--mono);font-size:11px;color:#fff;background:var(--ink-3);
+    width:22px;height:22px;border-radius:6px;display:grid;place-items:center;flex:none;
+  }
+  .mat-top .control{flex:1}
+  .mat-name{max-width:230px}
+  .kill{
+    border:1px solid var(--line);background:#fff;color:var(--muted);
+    width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;
+    transition:.16s ease;
+  }
+  .kill:hover{border-color:#F3B7B7;background:#FEF2F2;color:var(--danger)}
+  .mat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:12px}
+  .mat-foot{
+    display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;
+    padding:10px 12px;border-top:1px dashed var(--line);
+    font-size:12.5px;color:var(--muted);
+  }
+  .mat-foot b{font-family:var(--mono);color:var(--text);font-weight:600}
+  .mat-foot .hi b{color:var(--blue)}
+  .add{
+    margin-top:14px;width:100%;border:1px dashed #B9C6DA;background:#fff;color:var(--blue);
+    border-radius:11px;padding:12px;font-weight:600;font-size:14px;
+    transition:.16s ease;
+  }
+  .add:hover{background:#F2F7FF;border-color:var(--blue-br)}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .chip{
+    border:1px solid var(--line);background:#fff;border-radius:999px;
+    padding:6px 12px;font-size:12.5px;color:var(--muted);transition:.16s ease;
+  }
+  .chip:hover{border-color:var(--blue-br);color:var(--blue);background:#F5F9FF}
+
+  /* ---------- painel resumo (assinatura) ---------- */
+  .scale{
+    position:sticky;top:20px;margin-top:22px;
+    background:var(--ink);color:#fff;border-radius:18px;overflow:hidden;
+    box-shadow:0 30px 60px -32px rgba(10,21,38,.75);
+  }
+  .scale-head{
+    padding:16px 20px 0;display:flex;justify-content:space-between;align-items:center;
+    font-family:var(--display);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#8FA2BF;
+  }
+  .scale-head .live{display:flex;align-items:center;gap:6px;color:#9FE6C4}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  .weight{padding:6px 20px 0;display:flex;align-items:baseline;gap:8px}
+  .weight strong{
+    font-family:var(--mono);font-weight:600;font-size:40px;letter-spacing:-.03em;
+    font-variant-numeric:tabular-nums;
+  }
+  .weight span{font-family:var(--mono);font-size:14px;color:#8FA2BF}
+  .ruler{height:26px;margin:8px 20px 0;position:relative;overflow:hidden}
+  .ruler i{
+    position:absolute;top:0;width:1px;height:9px;background:rgba(255,255,255,.22);
+  }
+  .ruler i.tall{height:16px;background:rgba(255,255,255,.4)}
+  .mixbar{
+    display:flex;height:8px;margin:6px 20px 0;border-radius:99px;overflow:hidden;background:rgba(255,255,255,.08);
+  }
+  .mixbar span{transition:width .35s cubic-bezier(.4,0,.2,1)}
+  .mixlegend{padding:12px 20px 0;display:flex;flex-direction:column;gap:7px}
+  .mixrow{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#C3CEE0}
+  .mixrow i{width:8px;height:8px;border-radius:2px;flex:none}
+  .mixrow b{margin-left:auto;font-family:var(--mono);font-weight:500;color:#fff}
+  .empty{padding:14px 20px 4px;font-size:13px;color:#8FA2BF;line-height:1.55}
+  .money{margin:16px 12px 12px;background:rgba(255,255,255,.05);border-radius:12px;padding:14px 16px}
+  .money div{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;color:#C3CEE0;padding:4px 0}
+  .money div b{font-family:var(--mono);font-weight:500;color:#fff}
+  .money .total{
+    margin-top:8px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);
+    font-family:var(--display);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#fff;
+  }
+  .money .total b{font-family:var(--mono);font-size:21px;color:#7EB0FF;letter-spacing:-.02em}
+  .money .faint{color:#7B8CA8;font-size:12px}
+  .money .faint b{color:#9FB0C9;font-weight:400}
+  .cta{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    width:calc(100% - 24px);margin:0 12px 14px;border:0;border-radius:12px;
+    background:var(--blue-br);color:#fff;padding:15px;
+    font-family:var(--display);font-weight:700;font-size:14.5px;letter-spacing:.04em;
+    box-shadow:0 14px 26px -14px rgba(59,130,246,.9);
+    transition:transform .14s ease,background .18s ease;
+  }
+  .cta:hover{background:#2D74F0;transform:translateY(-1px)}
+  .cta:active{transform:translateY(0)}
+  .scale-note{padding:0 20px 18px;font-size:11.5px;color:#7B8CA8;text-align:center}
+
+  /* ---------- barra móvel ---------- */
+  .mobile-bar{
+    display:none;position:fixed;left:0;right:0;bottom:0;z-index:40;
+    background:var(--ink);color:#fff;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    align-items:center;gap:12px;box-shadow:0 -12px 30px -20px rgba(0,0,0,.8);
+  }
+  .mobile-bar div{line-height:1.25}
+  .mobile-bar small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#8FA2BF}
+  .mobile-bar b{font-family:var(--mono);font-size:17px;font-weight:600}
+  .mobile-bar button{
+    margin-left:auto;border:0;border-radius:10px;background:var(--blue-br);color:#fff;
+    padding:12px 20px;font-family:var(--display);font-weight:700;font-size:13.5px;letter-spacing:.04em;
+  }
+
+  /* ---------- tela de carregamento ---------- */
+  .loader{
+    position:fixed;inset:0;z-index:100;background:var(--ink);color:#fff;
+    display:none;place-items:center;text-align:center;
+  }
+  .loader.on{display:grid}
+  .loader::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(circle at 50% 38%, rgba(59,130,246,.20), transparent 58%);
+  }
+  .loader-in{position:relative;z-index:1;width:min(420px,86vw)}
+  .hopper{width:150px;height:150px;margin:0 auto 26px;position:relative}
+  .hopper svg{width:100%;height:100%;overflow:visible}
+  .pellet{animation:drop 1.15s cubic-bezier(.55,.05,.6,1) infinite}
+  .pellet:nth-child(2){animation-delay:.16s}
+  .pellet:nth-child(3){animation-delay:.34s}
+  .pellet:nth-child(4){animation-delay:.52s}
+  .pellet:nth-child(5){animation-delay:.7s}
+  @keyframes drop{
+    0%{transform:translateY(-46px);opacity:0}
+    22%{opacity:1}
+    70%{transform:translateY(38px);opacity:1}
+    100%{transform:translateY(58px);opacity:0}
+  }
+  .loader h4{
+    margin:0;font-family:var(--display);font-weight:800;font-size:19px;letter-spacing:-.01em;
+  }
+  .loader-step{
+    margin:10px 0 22px;font-family:var(--mono);font-size:13px;color:#9BB4DA;min-height:20px;
+  }
+  .track{height:3px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}
+  .track i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue-br),var(--melt));transition:width .35s ease}
+  .loader-logo{width:78px;height:17px;margin:28px auto 0;opacity:.45}
+
+  /* ---------- documento ---------- */
+  .stage{display:none;background:#7C8AA3;min-height:100vh;padding:0 0 60px}
+  .stage.on{display:block}
+  .stage-bar{
+    position:sticky;top:0;z-index:20;background:var(--ink);color:#fff;
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:14px 24px;box-shadow:0 10px 30px -20px #000;
+  }
+  .stage-bar p{margin:0;margin-right:auto;font-size:13px;color:#9FB0C9}
+  .stage-bar p b{color:#fff;font-family:var(--display);letter-spacing:.05em}
+  .btn{
+    border:1px solid rgba(255,255,255,.2);background:transparent;color:#E6ECF6;
+    padding:10px 18px;border-radius:9px;font-size:13.5px;font-weight:600;transition:.16s ease;
+  }
+  .btn:hover{background:rgba(255,255,255,.1)}
+  .btn.primary{background:var(--blue-br);border-color:var(--blue-br);color:#fff}
+  .btn.primary:hover{background:#2D74F0}
+  .sheet-wrap{padding:28px 20px;display:flex;justify-content:center}
+  .sheet{
+    width:100%;max-width:1180px;background:#fff;border-radius:6px;overflow:hidden;
+    box-shadow:0 40px 80px -40px rgba(0,0,0,.6);
+  }
+
+  .doc-head{background:var(--ink);color:#fff;padding:30px 40px;display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+  .doc-head .lockup{height:38px}
+  .doc-head .logo{width:172px;height:36px}
+  .doc-head .word{font-size:13px}
+  .doc-head p{margin:10px 0 0;font-size:12.5px;color:#9FB0C9}
+  .doc-head .right{text-align:right}
+  .doc-head .right strong{font-family:var(--display);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+  .doc-head .right span{display:block;font-size:12px;color:#9FB0C9;margin-top:3px}
+  .doc-body{padding:28px 40px 34px}
+  .doc-cli{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:26px}
+  .doc-lab{font-family:var(--display);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+  .doc-cli h3{margin:0;font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:-.01em;text-transform:uppercase}
+  .doc-cli .sub{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:3px}
+  .doc-cli .addr{font-size:14px;line-height:1.5}
+  table{width:100%;border-collapse:collapse}
+  thead th{
+    font-family:var(--display);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+    text-align:right;padding:0 0 10px;border-bottom:1px solid var(--line);font-weight:600;
+  }
+  thead th:first-child,thead th:nth-child(2){text-align:left}
+  tbody td{padding:14px 0;border-bottom:1px solid var(--mist);text-align:right;font-family:var(--mono);font-size:13.5px}
+  tbody td:first-child{text-align:left;font-family:var(--display);font-weight:700;font-size:14px}
+  tbody td:nth-child(2){text-align:left;color:#94A3B8;font-size:12.5px}
+  tbody td.icms{color:#94A3B8}
+  tbody td.tot{color:var(--blue);font-weight:600}
+  .doc-fn{font-size:11.5px;color:#94A3B8;margin:12px 0 24px;font-style:italic}
+  .doc-cards{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:16px}
+  .dc{border-radius:12px;padding:20px}
+  .dc.kg{background:var(--paper);border:1px solid var(--mist);display:flex;flex-direction:column;justify-content:space-between}
+  .dc.kg .big{font-family:var(--mono);font-weight:600;font-size:29px;letter-spacing:-.02em;margin-top:6px}
+  .pill{display:inline-block;margin-top:6px;background:#D8F5E6;color:#046C4E;border-radius:999px;padding:5px 14px;font-family:var(--display);font-size:12px;font-weight:700;letter-spacing:.06em}
+  .dc.fin{background:var(--ink);color:#fff}
+  .dc.fin .doc-lab{color:#8FA2BF}
+  .dc.fin .row{display:flex;justify-content:space-between;gap:14px;font-size:13px;color:#C3CEE0;padding:5px 0}
+  .dc.fin .row b{font-family:var(--mono);font-weight:400;color:#fff}
+  .dc.fin .row.strong{color:#7EB0FF;font-weight:600}
+  .dc.fin .row.strong b{color:#7EB0FF;font-weight:600}
+  .dc.fin .row.faint{color:#7B8CA8;font-size:11.5px;border-top:1px solid rgba(255,255,255,.1);margin-top:4px;padding-top:8px}
+  .dc.fin .row.faint b{color:#9FB0C9;font-size:11.5px}
+  .dc.fin .grand{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.16)}
+  .dc.fin .grand span{font-family:var(--display);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+  .dc.fin .grand b{font-family:var(--mono);font-size:24px;font-weight:600;letter-spacing:-.02em}
+  .dc.terms{border:1px solid var(--mist)}
+  .dc.terms .blk{margin-bottom:16px}
+  .dc.terms .blk:last-child{margin-bottom:0}
+  .dc.terms .val{font-size:14px;font-weight:500}
+  .doc-note{margin-top:22px;border-left:3px solid var(--blue-br);background:var(--paper);padding:14px 18px;font-size:13px;color:#334155;font-style:italic;border-radius:0 8px 8px 0;white-space:pre-wrap}
+  .doc-foot{background:var(--ink);color:#fff;padding:18px 40px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .doc-foot .logo{width:88px;height:19px;opacity:.9}
+  .doc-foot span{font-size:12px;color:#8FA2BF}
+  .doc-foot .doc-id{font-family:var(--mono);font-size:11.5px;color:#7B8CA8}
+
+  /* ---------- aviso ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translate(-50%,14px);
+    z-index:120;background:var(--ink-2);color:#fff;border:1px solid rgba(255,255,255,.14);
+    padding:13px 20px;border-radius:12px;font-size:13.5px;max-width:min(420px,90vw);
+    box-shadow:0 22px 44px -22px rgba(0,0,0,.7);
+    opacity:0;pointer-events:none;transition:opacity .2s ease,transform .2s ease;
+  }
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+
+  /* ---------- responsivo ---------- */
+  @media (max-width:1080px){
+    .wrap{grid-template-columns:1fr;padding-bottom:120px}
+    .scale{position:static;order:-1;margin-top:16px}
+    .mobile-bar{display:none}
+  }
+  @media (max-width:720px){
+    .wrap{padding:20px 16px 120px}
+    .topbar-in{padding:14px 16px}
+    .brand p{display:none}
+    .grid2{grid-template-columns:1fr}
+    .mat-grid{grid-template-columns:1fr 1fr}
+    .mat-top{flex-wrap:wrap}
+    .mat-name{max-width:none;flex:1 1 100%;order:2}
+    .scale{display:none}
+    .mobile-bar{display:flex}
+    .doc-cli,.doc-cards{grid-template-columns:1fr}
+    .doc-head,.doc-body,.doc-foot{padding-left:22px;padding-right:22px}
+    .sheet-wrap{padding:16px 10px}
+    .doc-head h2{font-size:23px}
+    table{font-size:12px}
+    thead th{font-size:9px}
+    tbody td{font-size:12px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  }
+
+  /* ---------- impressão ---------- */
+  @page{size:A4 landscape;margin:8mm}
+  @media print{
+    body{background:#fff}
+    .topbar,.wrap,.mobile-bar,.stage-bar,.loader,.toast{display:none!important}
+    .stage{display:block!important;background:#fff;padding:0}
+    .sheet-wrap{padding:0}
+    .sheet{box-shadow:none;border-radius:0;max-width:none}
+    .doc-head,.doc-foot,.dc.fin{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="logo logo-w" role="img" aria-label="LORD Polímeros"></span>
+      <p>Gerador de pedidos e orçamentos</p>
+    </div>
+    <div class="segmented" role="group" aria-label="Tipo de documento">
+      <button type="button" id="tab-pedido" aria-pressed="true">Pedido</button>
+      <button type="button" id="tab-orcamento" aria-pressed="false">Orçamento</button>
+    </div>
+    <button type="button" class="ghost" id="btn-limpar">Começar do zero</button>
+  </div>
+</header>
+
+<main class="wrap" id="app">
+  <div class="intro">
+    <div>
+      <h2 id="titulo">Novo pedido de resina</h2>
+      <p id="subtitulo">Preencha os dados, confira o peso e o valor no painel ao lado e gere o documento pronto para enviar ao cliente.</p>
+    </div>
+    <div class="stamp" id="carimbo">—</div>
+  </div>
+
+  <div>
+    <!-- cliente -->
+    <section class="panel">
+      <div class="panel-head"><span class="step">01</span><h3>Cliente</h3></div>
+      <div class="panel-body">
+        <div class="grid2">
+          <div class="field">
+            <label for="empresa">Nome da empresa <span class="req">*</span></label>
+            <input class="control" id="empresa" placeholder="PEDROCA EMBALAGENS PINTUDAS" autocomplete="organization">
+            <p class="err" id="err-empresa">Informe o nome da empresa para gerar o documento.</p>
+          </div>
+          <div class="field">
+            <label for="cnpj">CNPJ</label>
+            <input class="control num" id="cnpj" inputmode="numeric" placeholder="00.000.000/0000-00">
+          </div>
+          <div class="field">
+            <label for="emissao">Data de emissão</label>
+            <input class="control" id="emissao" type="date">
+          </div>
+          <div class="field">
+            <label for="endereco">Endereço de entrega</label>
+            <input class="control" id="endereco" placeholder="Rua, número, bairro, cidade - UF">
+          </div>
+          <div class="field">
+            <label for="numero" id="lbl-numero">Número do pedido</label>
+            <input class="control num" id="numero" placeholder="PED-2026-0148">
+          </div>
+          <div class="field">
+            <label for="vendedor">Vendedor responsável</label>
+            <input class="control" id="vendedor" placeholder="Nome de quem assina o documento">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- materiais -->
+    <section class="panel">
+      <div class="panel-head">
+        <span class="step">02</span><h3>Materiais</h3>
+      </div>
+      <div class="panel-body">
+        <div class="mat-list" id="lista"></div>
+        <button type="button" class="add" id="btn-add">+ Adicionar material</button>
+        <div class="chips" aria-label="Atalhos de material">
+          <button type="button" class="chip" data-quick="Linear">Linear</button>
+          <button type="button" class="chip" data-quick="Alta">Alta</button>
+          <button type="button" class="chip" data-quick="MPR SCR">MPR SCR</button>
+          <button type="button" class="chip" data-quick="Metaloceno">Metaloceno</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- condições -->
+    <section class="panel">
+      <div class="panel-head"><span class="step">03</span><h3>Condições comerciais</h3></div>
+      <div class="panel-body">
+        <div class="grid2">
+          <div class="field">
+            <label for="pagamento">Pagamento</label>
+            <input class="control" id="pagamento" placeholder="A VISTA, 30 DDL, 28/35/42..." list="pgs">
+            <datalist id="pgs">
+              <option value="A VISTA"></option><option value="7 DDL"></option>
+              <option value="14 DDL"></option><option value="21 DDL"></option>
+              <option value="28 DDL"></option><option value="30 DDL"></option>
+              <option value="28/35/42 DDL"></option>
+            </datalist>
+          </div>
+          <div class="field">
+            <label for="frete">Frete</label>
+            <select class="control" id="frete">
+              <option value="CIF">CIF — entrega por nossa conta</option>
+              <option value="FOB">FOB — retirada pelo cliente</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="entrega" id="lbl-entrega">Data de entrega</label>
+            <input class="control" id="entrega" type="date">
+          </div>
+          <div class="field" id="wrap-validade" hidden>
+            <label for="validade">Proposta válida até</label>
+            <input class="control" id="validade" type="date">
+          </div>
+          <div class="field">
+            <label for="periodo">Período de entrega</label>
+            <input class="control" id="periodo" placeholder="Manhã, Tarde, Integral" list="pers">
+            <datalist id="pers">
+              <option value="MANHÃ"></option><option value="TARDE"></option><option value="INTEGRAL"></option>
+            </datalist>
+          </div>
+        </div>
+        <div class="field" style="margin-top:16px">
+          <label for="obs">Observações</label>
+          <textarea class="control" id="obs" placeholder="Instruções de descarga, contato no recebimento, ordem de compra do cliente…"></textarea>
+          <p class="hint">Aparece no rodapé do documento. Se ficar em branco, geramos um resumo automático do pedido.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- painel resumo -->
+  <aside class="scale" aria-label="Resumo do documento">
+    <div class="scale-head"><span>Peso total</span><span class="live"><i class="dot"></i>ao vivo</span></div>
+    <div class="weight"><strong id="kg">0,000</strong><span>kg</span></div>
+    <div class="ruler" id="ruler" aria-hidden="true"></div>
+    <div class="mixbar" id="mixbar" aria-hidden="true"></div>
+    <div class="mixlegend" id="mixlegend"></div>
+    <p class="empty" id="vazio">Nenhum material com peso ainda. Preencha quantidade e valor por quilo para ver a composição da carga.</p>
+    <div class="money">
+      <div><span>Subtotal de materiais</span><b id="s-sub">R$ 0,00</b></div>
+      <div><span>Total IPI</span><b id="s-ipi">R$ 0,00</b></div>
+      <div class="faint"><span>ICMS (já incluso no preço)</span><b id="s-icms">R$ 0,00</b></div>
+      <div class="total"><span>Total geral</span><b id="s-total">R$ 0,00</b></div>
+    </div>
+    <button type="button" class="cta" id="btn-gerar">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/></svg>
+      <span id="cta-label">Gerar pedido</span>
+    </button>
+    <p class="scale-note">Você revisa o documento antes de salvar ou imprimir.</p>
+  </aside>
+</main>
+
+<div class="mobile-bar">
+  <div><small>Total geral</small><b id="m-total">R$ 0,00</b></div>
+  <button type="button" id="btn-gerar-mobile">Gerar</button>
+</div>
+
+<!-- carregamento -->
+<div class="loader" id="loader" role="status" aria-live="polite">
+  <div class="loader-in">
+    <div class="hopper">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <g class="pellets">
+          <g class="pellet"><circle cx="46" cy="34" r="4.5" fill="#3B82F6"/></g>
+          <g class="pellet"><circle cx="60" cy="30" r="4" fill="#7EB0FF"/></g>
+          <g class="pellet"><circle cx="74" cy="35" r="4.5" fill="#F2A33C"/></g>
+          <g class="pellet"><circle cx="53" cy="28" r="3.5" fill="#7EB0FF"/></g>
+          <g class="pellet"><circle cx="67" cy="33" r="4" fill="#3B82F6"/></g>
+        </g>
+        <path d="M22 62 H98 L70 100 H50 Z" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="2.5" stroke-linejoin="round"/>
+        <line x1="14" y1="62" x2="106" y2="62" stroke="rgba(255,255,255,.28)" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h4 id="loader-title">Gerando o documento</h4>
+    <p class="loader-step" id="loader-step">Conferindo os dados do cliente…</p>
+    <div class="track"><i id="loader-bar"></i></div>
+    <span class="logo logo-w loader-logo"></span>
+  </div>
+</div>
+
+<!-- documento -->
+<div class="stage" id="stage">
+  <div class="stage-bar">
+    <p><b id="stage-kind">PEDIDO</b> · <span id="stage-cli">—</span></p>
+    <button type="button" class="btn" id="btn-voltar">Voltar e editar</button>
+    <button type="button" class="btn" id="btn-copiar">Copiar resumo</button>
+    <button type="button" class="btn primary" id="btn-print">Salvar PDF / imprimir</button>
+  </div>
+  <div class="sheet-wrap"><div class="sheet" id="sheet"></div></div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(s){ return document.querySelector(s); };
+  var MATERIAIS = ["Linear","Alta","Baixa","MPR SCR","Metaloceno","EVA","PP Homopolímero","PP Copolímero","PS Cristal","PET","Outro"];
+  var CORES = ["#3B82F6","#7EB0FF","#F2A33C","#34D399","#A78BFA","#F472B6","#22D3EE","#FBBF24"];
+  var tipo = "pedido";
+  var itens = [];
+  var seq = 0;
+
+  /* ---------- utilidades ---------- */
+  function brl(n){ return "R$ " + (n||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  function kg(n){ return (n||0).toLocaleString("pt-BR",{minimumFractionDigits:3,maximumFractionDigits:3}); }
+  function pct(n){ var v = (n||0).toLocaleString("pt-BR",{minimumFractionDigits:0,maximumFractionDigits:2}); return v + "%"; }
+  function num(v){
+    if(v === null || v === undefined) return 0;
+    var s = String(v).trim().replace(/\s/g,"");
+    if(!s) return 0;
+    if(s.indexOf(",") > -1) s = s.replace(/\./g,"").replace(",",".");
+    else if(/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g,""); // 2.750 = dois mil setecentos e cinquenta
+    var n = parseFloat(s);
+    return isNaN(n) ? 0 : n;
+  }
+  function dataBR(iso){
+    if(!iso) return "—";
+    var p = iso.split("-");
+    return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : iso;
+  }
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];
+    });
+  }
+  function hoje(){
+    var d = new Date(), p = function(v){ return String(v).padStart(2,"0"); };
+    return d.getFullYear() + "-" + p(d.getMonth()+1) + "-" + p(d.getDate());
+  }
+
+  /* ---------- materiais ---------- */
+  function novoItem(nome){
+    seq++;
+    itens.push({ id: seq, nome: nome || "Linear", livre: "", cod: "", qtd: "", vlr: "", ipi: "5", icms: "18" });
+    render();
+  }
+
+  function calcItem(it){
+    var q = num(it.qtd), v = num(it.vlr), ipi = num(it.ipi), icms = num(it.icms);
+    var sub = q * v;
+    var vIpi = sub * ipi / 100;
+    return { q:q, sub:sub, ipi:vIpi, total:sub + vIpi, icms: sub * icms / 100 };
+  }
+
+  function totais(){
+    var t = { kg:0, sub:0, ipi:0, icms:0, total:0 };
+    itens.forEach(function(it){
+      var c = calcItem(it);
+      t.kg += c.q; t.sub += c.sub; t.ipi += c.ipi; t.icms += c.icms; t.total += c.total;
+    });
+    return t;
+  }
+
+  function nomeDe(it){
+    return it.nome === "Outro" ? (it.livre || "Material") : it.nome;
+  }
+
+  function render(){
+    var lista = $("#lista");
+    lista.innerHTML = "";
+    itens.forEach(function(it, i){
+      var c = calcItem(it);
+      var el = document.createElement("div");
+      el.className = "mat";
+      el.innerHTML =
+        '<div class="mat-top">' +
+          '<span class="mat-idx">' + (i+1) + '</span>' +
+          '<select class="control mat-name" data-f="nome">' +
+            MATERIAIS.map(function(m){ return '<option' + (m === it.nome ? ' selected' : '') + '>' + m + '</option>'; }).join("") +
+          '</select>' +
+          (it.nome === "Outro" ? '<input class="control" data-f="livre" placeholder="Nome do material" value="' + esc(it.livre) + '">' : '') +
+          '<input class="control" data-f="cod" placeholder="Código interno (opcional)" value="' + esc(it.cod) + '">' +
+          '<button type="button" class="kill" data-dup title="Duplicar material" aria-label="Duplicar material ' + (i+1) + '">' +
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>' +
+          '</button>' +
+          '<button type="button" class="kill" data-del title="Remover material" aria-label="Remover material ' + (i+1) + '">' +
+            '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>' +
+          '</button>' +
+        '</div>' +
+        '<div class="mat-grid">' +
+          campo("Quantidade (kg)","qtd",it.qtd,"0,000") +
+          campo("Valor por kg (R$)","vlr",it.vlr,"0,00") +
+          campo("IPI (%)","ipi",it.ipi,"5") +
+          campo("ICMS (%)","icms",it.icms,"18") +
+        '</div>' +
+        '<div class="mat-foot">' +
+          '<span>Subtotal <b>' + brl(c.sub) + '</b></span>' +
+          '<span>IPI <b>' + brl(c.ipi) + '</b></span>' +
+          '<span class="hi">Total com IPI <b>' + brl(c.total) + '</b></span>' +
+          '<span style="margin-left:auto">ICMS ' + pct(num(it.icms)) + ' já incluso no preço</span>' +
+        '</div>';
+
+      el.querySelectorAll("[data-f]").forEach(function(inp){
+        inp.addEventListener("input", function(){
+          it[inp.dataset.f] = inp.value;
+          if(inp.dataset.f === "nome") render(); else atualiza(el, it);
+        });
+        inp.addEventListener("change", function(){
+          it[inp.dataset.f] = inp.value;
+          if(inp.dataset.f === "nome") render();
+        });
+      });
+      el.querySelector("[data-dup]").addEventListener("click", function(){
+        seq++;
+        var copia = JSON.parse(JSON.stringify(it));
+        copia.id = seq;
+        itens.splice(i + 1, 0, copia);
+        render();
+      });
+      el.querySelector("[data-del]").addEventListener("click", function(){
+        itens = itens.filter(function(x){ return x.id !== it.id; });
+        if(!itens.length) novoItem(); else render();
+      });
+      lista.appendChild(el);
+    });
+    resumo();
+  }
+
+  function campo(label, f, val, ph){
+    return '<div class="field"><label>' + label + '</label>' +
+      '<input class="control num" inputmode="decimal" data-f="' + f + '" value="' + esc(val) + '" placeholder="' + ph + '"></div>';
+  }
+
+  function atualiza(el, it){
+    var c = calcItem(it);
+    var b = el.querySelectorAll(".mat-foot b");
+    b[0].textContent = brl(c.sub);
+    b[1].textContent = brl(c.ipi);
+    b[2].textContent = brl(c.total);
+    el.querySelector(".mat-foot span:last-child").textContent = "ICMS " + pct(num(it.icms)) + " já incluso no preço";
+    resumo();
+  }
+
+  /* ---------- painel resumo ---------- */
+  function resumo(){
+    var t = totais();
+    $("#kg").textContent = kg(t.kg);
+    $("#s-sub").textContent = brl(t.sub);
+    $("#s-ipi").textContent = brl(t.ipi);
+    $("#s-icms").textContent = brl(t.icms);
+    $("#s-total").textContent = brl(t.total);
+    $("#m-total").textContent = brl(t.total);
+
+    var bar = $("#mixbar"), leg = $("#mixlegend");
+    bar.innerHTML = ""; leg.innerHTML = "";
+    var comPeso = itens.filter(function(it){ return num(it.qtd) > 0; });
+    $("#vazio").style.display = comPeso.length ? "none" : "block";
+    comPeso.forEach(function(it, i){
+      var q = num(it.qtd), p = t.kg ? (q / t.kg * 100) : 0, cor = CORES[i % CORES.length];
+      var s = document.createElement("span");
+      s.style.width = p + "%"; s.style.background = cor;
+      bar.appendChild(s);
+      var r = document.createElement("div");
+      r.className = "mixrow";
+      r.innerHTML = '<i style="background:' + cor + '"></i><span>' + esc(nomeDe(it)) + '</span><b>' + kg(q) + ' kg</b>';
+      leg.appendChild(r);
+    });
+
+    var emp = $("#empresa").value.trim();
+    $("#carimbo").textContent = (tipo === "pedido" ? "Pedido" : "Orçamento") + " · " +
+      dataBR($("#emissao").value) + (emp ? " · " + emp.toUpperCase() : "");
+  }
+
+  function regua(){
+    var r = $("#ruler");
+    r.innerHTML = "";
+    for(var i = 0; i <= 44; i++){
+      var t = document.createElement("i");
+      t.style.left = (i / 44 * 100) + "%";
+      if(i % 5 === 0) t.className = "tall";
+      r.appendChild(t);
+    }
+  }
+
+  /* ---------- documento ---------- */
+  function montaDoc(){
+    var t = totais();
+    var vivos = itens.filter(function(it){ return num(it.qtd) > 0 || num(it.vlr) > 0; });
+    var titulo = tipo === "pedido" ? "Pedido Comercial" : "Orçamento Comercial";
+    var empresa = $("#empresa").value.trim().toUpperCase();
+    var numero = $("#numero").value.trim().toUpperCase();
+    var vendedor = $("#vendedor").value.trim();
+    var validade = $("#validade").value;
+    var cnpj = $("#cnpj").value.trim();
+    var end = $("#endereco").value.trim();
+    var pag = $("#pagamento").value.trim().toUpperCase() || "A COMBINAR";
+    var frete = $("#frete").value;
+    var ent = $("#entrega").value;
+    var per = $("#periodo").value.trim().toUpperCase();
+    var obs = $("#obs").value.trim();
+    var entregaTxt = ent ? dataBR(ent) + (per ? " (" + per + ")" : "") : "A COMBINAR";
+    var rotuloEntrega = tipo === "pedido" ? "Entrega" : "Previsão de entrega";
+
+    if(!obs){
+      obs = titulo + " para " + (empresa || "cliente") + ". Frete " + frete + "." +
+            (end ? " Endereço de entrega: " + end + "." : "") +
+            (tipo === "orcamento"
+              ? (validade ? " Proposta válida até " + dataBR(validade) + ", sujeita a confirmação de estoque."
+                          : " Proposta sujeita a confirmação de estoque.")
+              : "");
+    }
+
+    var linhas = vivos.map(function(it){
+      var c = calcItem(it);
+      return '<tr>' +
+        '<td>' + esc(nomeDe(it)) + '</td>' +
+        '<td>' + (it.cod ? esc(it.cod) : "—") + '</td>' +
+        '<td>' + kg(c.q) + '</td>' +
+        '<td>' + brl(num(it.vlr)) + '</td>' +
+        '<td>' + pct(num(it.ipi)) + '</td>' +
+        '<td>' + brl(c.ipi) + '</td>' +
+        '<td class="icms">' + pct(num(it.icms)) + '*</td>' +
+        '<td class="tot">' + brl(c.total) + '</td>' +
+      '</tr>';
+    }).join("");
+
+    $("#sheet").innerHTML =
+      '<div class="doc-head">' +
+        '<div>' +
+          '<div class="lockup"><span class="logo logo-w"></span><span class="bar"></span><span class="word">Polímeros</span></div>' +
+          '<p>' + titulo + (vendedor ? ' · ' + esc(vendedor) : '') + '</p>' +
+        '</div>' +
+        '<div class="right"><strong>' + (numero ? esc(numero) : titulo) + '</strong>' +
+          '<span>Emissão: ' + dataBR($("#emissao").value) + '</span>' +
+          (tipo === "orcamento" && validade ? '<span>Válido até: ' + dataBR(validade) + '</span>' : '') +
+        '</div>' +
+      '</div>' +
+      '<div class="doc-body">' +
+        '<div class="doc-cli">' +
+          '<div><div class="doc-lab">Cliente</div><h3>' + esc(empresa || "—") + '</h3>' +
+            (cnpj ? '<div class="sub">' + esc(cnpj) + '</div>' : '') + '</div>' +
+          '<div><div class="doc-lab">Endereço de entrega</div><div class="addr">' + esc(end || "A combinar") + '</div></div>' +
+        '</div>' +
+        '<table><thead><tr>' +
+          '<th>Material</th><th>Cód.</th><th>Qtd (kg)</th><th>Vlr unit.</th>' +
+          '<th>IPI %</th><th>Valor IPI</th><th>ICMS %*</th><th>Total c/ IPI</th>' +
+        '</tr></thead><tbody>' + (linhas || '<tr><td colspan="8" style="text-align:center;color:#94A3B8;font-family:var(--body)">Nenhum material lançado</td></tr>') + '</tbody></table>' +
+        '<p class="doc-fn">* ICMS já incluso no preço unitário — valor apresentado para fins informativos.</p>' +
+        '<div class="doc-cards">' +
+          '<div class="dc kg">' +
+            '<div><div class="doc-lab">Total em kg</div><div class="big">' + kg(t.kg) + ' kg</div></div>' +
+            '<div style="margin-top:18px"><div class="doc-lab">Tipo de frete</div><span class="pill">' + frete + '</span></div>' +
+          '</div>' +
+          '<div class="dc fin">' +
+            '<div class="doc-lab">Resumo financeiro</div>' +
+            '<div class="row"><span>Subtotal de materiais</span><b>' + brl(t.sub) + '</b></div>' +
+            '<div class="row"><span>Total IPI</span><b>' + brl(t.ipi) + '</b></div>' +
+            '<div class="row strong"><span>Total com IPI</span><b>' + brl(t.total) + '</b></div>' +
+            '<div class="row faint"><span>ICMS (informativo — incluso no preço)</span><b>' + brl(t.icms) + '</b></div>' +
+            '<div class="grand"><span>Total geral</span><b>' + brl(t.total) + '</b></div>' +
+          '</div>' +
+          '<div class="dc terms">' +
+            '<div class="blk"><div class="doc-lab">Pagamento</div><div class="val">' + esc(pag) + '</div></div>' +
+            '<div class="blk"><div class="doc-lab">Frete</div><div class="val">' + frete + '</div></div>' +
+            '<div class="blk"><div class="doc-lab">' + rotuloEntrega + '</div><div class="val">' + esc(entregaTxt) + '</div></div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="doc-note">' + esc(obs) + '</div>' +
+      '</div>' +
+      '<div class="doc-foot">' +
+        '<span class="logo logo-w"></span>' +
+        '<span class="doc-id">' + esc(numero || titulo.toUpperCase()) + ' · ' + dataBR($("#emissao").value) + (vendedor ? ' · ' + esc(vendedor) : '') + '</span>' +
+        '<span>www.lord.com.br</span>' +
+      '</div>';
+
+    $("#stage-kind").textContent = tipo === "pedido" ? "PEDIDO" : "ORÇAMENTO";
+    $("#stage-cli").textContent = empresa || "sem cliente";
+    document.title = (tipo === "pedido" ? "pedido" : "orcamento") + "-" +
+      (empresa ? empresa.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") : "sem-cliente") +
+      "-" + ($("#emissao").value || hoje());
+  }
+
+  /* ---------- carregamento ---------- */
+  var PASSOS = [
+    "Conferindo os dados do cliente…",
+    "Somando quantidades e fechando o peso…",
+    "Calculando IPI e destacando o ICMS…",
+    "Montando o documento no padrão Lord…"
+  ];
+  function gerar(){
+    var emp = $("#empresa");
+    if(!emp.value.trim()){
+      emp.classList.add("invalid");
+      $("#err-empresa").classList.add("show");
+      emp.focus();
+      emp.scrollIntoView({behavior:"smooth", block:"center"});
+      return;
+    }
+    montaDoc();
+    var reduz = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var loader = $("#loader");
+    $("#loader-title").textContent = tipo === "pedido" ? "Gerando o pedido" : "Gerando o orçamento";
+    loader.classList.add("on");
+    document.body.classList.add("is-locked");
+
+    if(reduz){ setTimeout(abrir, 200); return; }
+
+    var i = 0;
+    $("#loader-step").textContent = PASSOS[0];
+    $("#loader-bar").style.width = "12%";
+    var timer = setInterval(function(){
+      i++;
+      if(i < PASSOS.length){
+        $("#loader-step").textContent = PASSOS[i];
+        $("#loader-bar").style.width = (12 + i * 29) + "%";
+      } else {
+        clearInterval(timer);
+        $("#loader-bar").style.width = "100%";
+        $("#loader-step").textContent = "Pronto.";
+        setTimeout(abrir, 380);
+      }
+    }, 620);
+  }
+  function abrir(){
+    $("#loader").classList.remove("on");
+    $("#loader-bar").style.width = "0";
+    $("#app").style.display = "none";
+    document.querySelector(".topbar").style.display = "none";
+    $("#stage").classList.add("on");
+    document.body.classList.remove("is-locked");
+    window.scrollTo(0,0);
+  }
+  function voltar(){
+    $("#stage").classList.remove("on");
+    $("#app").style.display = "";
+    document.querySelector(".topbar").style.display = "";
+    window.scrollTo(0,0);
+  }
+
+  /* ---------- eventos ---------- */
+  function setTipo(t){
+    tipo = t;
+    $("#tab-pedido").setAttribute("aria-pressed", t === "pedido");
+    $("#tab-orcamento").setAttribute("aria-pressed", t === "orcamento");
+    $("#titulo").textContent = t === "pedido" ? "Novo pedido de resina" : "Novo orçamento de resina";
+    $("#cta-label").textContent = t === "pedido" ? "Gerar pedido" : "Gerar orçamento";
+    $("#lbl-entrega").textContent = t === "pedido" ? "Data de entrega" : "Previsão de entrega";
+    $("#lbl-numero").textContent = t === "pedido" ? "Número do pedido" : "Número da proposta";
+    $("#numero").placeholder = t === "pedido" ? "PED-2026-0148" : "ORC-2026-0148";
+    $("#wrap-validade").hidden = t !== "orcamento";
+    $("#subtitulo").textContent = t === "pedido"
+      ? "Preencha os dados, confira o peso e o valor no painel ao lado e gere o documento pronto para enviar ao cliente."
+      : "Monte a proposta, ajuste preços por quilo e gere o orçamento pronto para enviar ao cliente.";
+    resumo();
+  }
+
+  $("#tab-pedido").addEventListener("click", function(){ setTipo("pedido"); });
+  $("#tab-orcamento").addEventListener("click", function(){ setTipo("orcamento"); });
+  $("#btn-add").addEventListener("click", function(){ novoItem(); });
+  document.querySelectorAll("[data-quick]").forEach(function(b){
+    b.addEventListener("click", function(){ novoItem(b.dataset.quick); });
+  });
+  $("#btn-gerar").addEventListener("click", gerar);
+  $("#btn-gerar-mobile").addEventListener("click", gerar);
+  $("#btn-voltar").addEventListener("click", voltar);
+  $("#btn-print").addEventListener("click", function(){ window.print(); });
+
+  function toast(msg){
+    var el = $("#toast");
+    el.textContent = msg;
+    el.classList.add("on");
+    clearTimeout(el._t);
+    el._t = setTimeout(function(){ el.classList.remove("on"); }, 2600);
+  }
+
+  $("#btn-copiar").addEventListener("click", function(){
+    var t = totais();
+    var linhas = itens.filter(function(it){ return num(it.qtd) > 0; }).map(function(it){
+      return "• " + nomeDe(it) + " — " + kg(num(it.qtd)) + " kg a " + brl(num(it.vlr)) + "/kg";
+    });
+    var ent = $("#entrega").value;
+    var texto = [
+      (tipo === "pedido" ? "PEDIDO" : "ORÇAMENTO") + " LORD POLÍMEROS" + ($("#numero").value.trim() ? " " + $("#numero").value.trim().toUpperCase() : ""),
+      $("#empresa").value.trim().toUpperCase(),
+      "",
+      linhas.join("\n"),
+      "",
+      "Peso total: " + kg(t.kg) + " kg",
+      "Total com IPI: " + brl(t.total),
+      "Pagamento: " + ($("#pagamento").value.trim().toUpperCase() || "A COMBINAR"),
+      "Frete: " + $("#frete").value,
+      (tipo === "pedido" ? "Entrega: " : "Previsão de entrega: ") +
+        (ent ? dataBR(ent) + ($("#periodo").value.trim() ? " (" + $("#periodo").value.trim().toUpperCase() + ")" : "") : "A COMBINAR")
+    ].join("\n");
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(texto).then(
+        function(){ toast("Resumo copiado — é só colar no WhatsApp ou no e-mail."); },
+        function(){ toast("Não deu para copiar. Selecione o texto do documento e copie manualmente."); }
+      );
+    } else {
+      toast("Este navegador não permite copiar automaticamente. Selecione o texto e copie.");
+    }
+  });
+  $("#btn-limpar").addEventListener("click", function(){
+    if(!confirm("Limpar tudo e começar um documento novo?")) return;
+    ["empresa","cnpj","endereco","pagamento","entrega","periodo","obs"].forEach(function(id){ $("#" + id).value = ""; });
+    $("#frete").value = "CIF";
+    $("#emissao").value = hoje();
+    itens = []; novoItem();
+    $("#empresa").classList.remove("invalid");
+    $("#err-empresa").classList.remove("show");
+  });
+
+  $("#empresa").addEventListener("input", function(){
+    if(this.value.trim()){ this.classList.remove("invalid"); $("#err-empresa").classList.remove("show"); }
+    resumo();
+  });
+  $("#emissao").addEventListener("change", resumo);
+
+  $("#cnpj").addEventListener("input", function(){
+    var v = this.value.replace(/\D/g,"").slice(0,14), o = "";
+    if(v.length > 12) o = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/,"$1.$2.$3/$4-$5");
+    else if(v.length > 8) o = v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/,"$1.$2.$3/$4");
+    else if(v.length > 5) o = v.replace(/(\d{2})(\d{3})(\d{1,3})/,"$1.$2.$3");
+    else if(v.length > 2) o = v.replace(/(\d{2})(\d{1,3})/,"$1.$2");
+    else o = v;
+    this.value = o;
+  });
+
+  document.addEventListener("keydown", function(e){
+    if((e.ctrlKey || e.metaKey) && e.key === "Enter"){ e.preventDefault(); gerar(); }
+    if(e.key === "Escape" && $("#stage").classList.contains("on")) voltar();
+  });
+
+  /* ---------- início ---------- */
+  $("#emissao").value = hoje();
+  regua();
+  novoItem();
+})();
+</script>
+</body>
 </html>
