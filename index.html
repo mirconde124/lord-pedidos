@@ -477,6 +477,7 @@
     <div class="segmented" role="group" aria-label="Tipo de documento">
       <button type="button" id="tab-pedido" aria-pressed="true">Pedido</button>
       <button type="button" id="tab-orcamento" aria-pressed="false">Orçamento</button>
+      <button type="button" id="tab-precos" aria-pressed="false">Tabela de preços</button>
     </div>
     <button type="button" class="ghost" id="btn-limpar">Começar do zero</button>
   </div>
@@ -648,7 +649,7 @@
   </div>
 </div>
 
-<div class="mobile-bar">
+<div class="mobile-bar" id="mobile-bar">
   <div><small>Total geral</small><b id="m-total">R$ 0,00</b></div>
   <button type="button" id="btn-gerar-mobile">Gerar</button>
 </div>
@@ -682,7 +683,8 @@
     <p><b id="stage-kind">PEDIDO</b> · <span id="stage-cli">—</span></p>
     <button type="button" class="btn" id="btn-voltar">Voltar e editar</button>
     <button type="button" class="btn" id="btn-copiar">Copiar resumo</button>
-    <button type="button" class="btn primary" id="btn-print">Salvar PDF / imprimir</button>
+    <button type="button" class="btn" id="btn-png">Baixar PNG</button>
+    <button type="button" class="btn primary" id="btn-print">Baixar PDF</button>
   </div>
   <div class="sheet-wrap"><div class="sheet" id="sheet"></div></div>
 </div>
@@ -1030,8 +1032,6 @@
   /* ---------- eventos ---------- */
   function setTipo(t){
     tipo = t;
-    $("#tab-pedido").setAttribute("aria-pressed", t === "pedido");
-    $("#tab-orcamento").setAttribute("aria-pressed", t === "orcamento");
     $("#titulo").textContent = t === "pedido" ? "Novo pedido de resina" : "Novo orçamento de resina";
     $("#cta-label").textContent = t === "pedido" ? "Gerar pedido" : "Gerar orçamento";
     $("#lbl-entrega").textContent = t === "pedido" ? "Data de entrega" : "Previsão de entrega";
@@ -1041,12 +1041,22 @@
     $("#subtitulo").textContent = t === "pedido"
       ? "Preencha os dados, confira o peso e o valor no painel ao lado e gere o documento pronto para enviar ao cliente."
       : "Monte a proposta, ajuste preços por quilo e gere o orçamento pronto para enviar ao cliente.";
-    $("#precos").hidden = t !== "orcamento";
     resumo();
   }
 
-  $("#tab-pedido").addEventListener("click", function(){ setTipo("pedido"); });
-  $("#tab-orcamento").addEventListener("click", function(){ setTipo("orcamento"); });
+  function setView(v){
+    $("#tab-pedido").setAttribute("aria-pressed", v === "pedido");
+    $("#tab-orcamento").setAttribute("aria-pressed", v === "orcamento");
+    $("#tab-precos").setAttribute("aria-pressed", v === "precos");
+    $("#app").hidden = v === "precos";
+    $("#precos").hidden = v !== "precos";
+    $("#mobile-bar").hidden = v === "precos";
+    if(v !== "precos") setTipo(v);
+  }
+
+  $("#tab-pedido").addEventListener("click", function(){ setView("pedido"); });
+  $("#tab-orcamento").addEventListener("click", function(){ setView("orcamento"); });
+  $("#tab-precos").addEventListener("click", function(){ setView("precos"); });
   $("#btn-add").addEventListener("click", function(){ novoItem(); });
   document.querySelectorAll("[data-quick]").forEach(function(b){
     b.addEventListener("click", function(){ novoItem(b.dataset.quick); });
@@ -1055,6 +1065,17 @@
   $("#btn-gerar-mobile").addEventListener("click", gerar);
   $("#btn-voltar").addEventListener("click", voltar);
   $("#btn-print").addEventListener("click", function(){ window.print(); });
+  $("#btn-png").addEventListener("click", function(){
+    var btn = this;
+    if(!window.html2canvas){ toast("Não foi possível carregar o exportador de imagem."); return; }
+    btn.disabled = true;
+    html2canvas($("#sheet"), { backgroundColor: "#ffffff", scale: 3, useCORS: true }).then(function(canvas){
+      var a = document.createElement("a");
+      a.href = canvas.toDataURL("image/png");
+      a.download = document.title + ".png";
+      a.click();
+    }).finally(function(){ btn.disabled = false; });
+  });
 
   function toast(msg){
     var el = $("#toast");
