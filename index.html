@@ -32,6 +32,7 @@
     --mono:'IBM Plex Mono', ui-monospace, monospace;
   }
   *{box-sizing:border-box}
+  [hidden]{display:none!important}
   html,body{margin:0;padding:0}
   body{
     background:var(--paper);
@@ -385,14 +386,51 @@
   }
   .toast.on{opacity:1;transform:translate(-50%,0)}
 
+  /* ---------- tabelas de preço (orçamento) ---------- */
+  .pt-wrap{
+    max-width:1320px;margin:0 auto;padding:28px 24px 140px;
+    display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;
+  }
+  .pt-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+    box-shadow:var(--shadow);overflow:hidden;
+  }
+  .pt-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 22px 0}
+  .pt-head h2{margin:0;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em}
+  .pt-head p{margin:4px 0 0;color:var(--muted);font-size:13px}
+  .pt-head .btn{padding:9px 16px;font-size:12.5px}
+  .pt-export{padding:20px 22px 6px}
+  .pt-table{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .pt-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;align-items:center}
+  .pt-table-2col .pt-row{grid-template-columns:1fr 1fr auto}
+  .pt-row.head{background:var(--paper);font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.04em}
+  .pt-row.head > div{padding:11px 14px}
+  .pt-row + .pt-row{border-top:1px solid var(--mist)}
+  .pt-cell{
+    padding:10px 12px;min-height:20px;outline:none;font-size:14.5px;
+    border-radius:8px;transition:background .14s ease;
+  }
+  .pt-cell:first-child{font-family:var(--display);font-weight:600}
+  .pt-cell:not(:first-child){font-family:var(--mono)}
+  .pt-cell:hover{background:var(--paper)}
+  .pt-cell:focus{background:#fff;box-shadow:inset 0 0 0 2px var(--blue-br)}
+  .pt-cell:empty:before{content:attr(data-placeholder);color:#9AA7BB;font-family:var(--body);font-weight:400}
+  .pt-row .kill{border:0;background:transparent;margin-right:8px}
+  .pt-add{
+    display:flex;align-items:center;gap:6px;margin:14px 22px 22px;border:0;background:transparent;
+    color:var(--blue);font-weight:600;font-size:13.5px;
+  }
+  .pt-add:hover{text-decoration:underline}
+
   /* ---------- responsivo ---------- */
   @media (max-width:1080px){
     .wrap{grid-template-columns:1fr;padding-bottom:120px}
     .scale{position:static;order:-1;margin-top:16px}
     .mobile-bar{display:none}
+    .pt-wrap{grid-template-columns:1fr}
   }
   @media (max-width:720px){
-    .wrap{padding:20px 16px 120px}
+    .wrap,.pt-wrap{padding:20px 16px 120px}
     .topbar-in{padding:14px 16px}
     .brand p{display:none}
     .grid2{grid-template-columns:1fr}
@@ -408,6 +446,9 @@
     table{font-size:12px}
     thead th{font-size:9px}
     tbody td{font-size:12px}
+    .pt-row{grid-template-columns:1fr}
+    .pt-row.head{display:none}
+    .pt-table-2col .pt-row{grid-template-columns:1fr}
   }
   @media (prefers-reduced-motion:reduce){
     *{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -458,7 +499,7 @@
         <div class="grid2">
           <div class="field">
             <label for="empresa">Nome da empresa <span class="req">*</span></label>
-            <input class="control" id="empresa" placeholder="PEDROCA EMBALAGENS PINTUDAS" autocomplete="organization">
+            <input class="control" id="empresa" placeholder="PLASTFORT EMBALAGENS LTDA" autocomplete="organization">
             <p class="err" id="err-empresa">Informe o nome da empresa para gerar o documento.</p>
           </div>
           <div class="field">
@@ -571,6 +612,42 @@
   </aside>
 </main>
 
+<div class="pt-wrap" id="precos" hidden>
+  <div class="pt-card">
+    <div class="pt-head">
+      <div>
+        <h2>Tabela de preços</h2>
+        <p>Valores por material · R$ + IPI</p>
+      </div>
+      <button type="button" class="btn primary" data-pt-export="padrao">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        Exportar PNG
+      </button>
+    </div>
+    <div class="pt-export" id="pt-export-padrao">
+      <div class="pt-table" id="pt-table-padrao"></div>
+    </div>
+    <button type="button" class="pt-add" data-pt-add="padrao">+ Adicionar material</button>
+  </div>
+
+  <div class="pt-card">
+    <div class="pt-head">
+      <div>
+        <h2>Material recuperado</h2>
+        <p>Valores por material · R$ + IPI</p>
+      </div>
+      <button type="button" class="btn primary" data-pt-export="recuperado">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        Exportar PNG
+      </button>
+    </div>
+    <div class="pt-export" id="pt-export-recuperado">
+      <div class="pt-table pt-table-2col" id="pt-table-recuperado"></div>
+    </div>
+    <button type="button" class="pt-add" data-pt-add="recuperado">+ Adicionar material</button>
+  </div>
+</div>
+
 <div class="mobile-bar">
   <div><small>Total geral</small><b id="m-total">R$ 0,00</b></div>
   <button type="button" id="btn-gerar-mobile">Gerar</button>
@@ -612,6 +689,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
 (function(){
   "use strict";
@@ -963,6 +1041,7 @@
     $("#subtitulo").textContent = t === "pedido"
       ? "Preencha os dados, confira o peso e o valor no painel ao lado e gere o documento pronto para enviar ao cliente."
       : "Monte a proposta, ajuste preços por quilo e gere o orçamento pronto para enviar ao cliente.";
+    $("#precos").hidden = t !== "orcamento";
     resumo();
   }
 
@@ -1045,10 +1124,91 @@
     if(e.key === "Escape" && $("#stage").classList.contains("on")) voltar();
   });
 
+  /* ---------- tabelas de preço (orçamento) ---------- */
+  var PT_KEYS = { padrao: "lord_precos_padrao", recuperado: "lord_precos_recuperado" };
+  function ptEmptyRow(kind){
+    seq++;
+    return kind === "recuperado" ? { id: seq, material: "", preco: "" } : { id: seq, material: "", nacional: "", importado: "" };
+  }
+  function ptLoad(kind){
+    try{
+      var saved = JSON.parse(localStorage.getItem(PT_KEYS[kind]) || "null");
+      return (saved && saved.length) ? saved : [ptEmptyRow(kind)];
+    }catch(e){ return [ptEmptyRow(kind)]; }
+  }
+  var ptRows = { padrao: ptLoad("padrao"), recuperado: ptLoad("recuperado") };
+  function ptSave(kind){ localStorage.setItem(PT_KEYS[kind], JSON.stringify(ptRows[kind])); }
+
+  function ptCell(row, field, placeholder){
+    return '<div class="pt-cell" contenteditable="true" data-row="' + row.id + '" data-field="' + field + '" data-placeholder="' + placeholder + '">' + esc(row[field] || "") + '</div>';
+  }
+
+  function ptRender(kind){
+    var wrap = $("#pt-table-" + kind);
+    var rows = ptRows[kind];
+    var head = kind === "recuperado"
+      ? '<div class="pt-row head"><div>Material</div><div>Preço</div><div></div></div>'
+      : '<div class="pt-row head"><div>Material</div><div>Nacional</div><div>Importado</div><div></div></div>';
+    var body = rows.map(function(r){
+      var cells = kind === "recuperado"
+        ? ptCell(r, "material", "Material") + ptCell(r, "preco", "R$ 0,00 + IPI")
+        : ptCell(r, "material", "Material") + ptCell(r, "nacional", "R$ 0,00 + IPI") + ptCell(r, "importado", "—");
+      return '<div class="pt-row">' + cells +
+        '<button type="button" class="kill" data-pt-del="' + kind + '" data-id="' + r.id + '" data-html2canvas-ignore="true" title="Remover material" aria-label="Remover material">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>' +
+        '</button></div>';
+    }).join("");
+    wrap.innerHTML = head + body;
+
+    wrap.querySelectorAll(".pt-cell").forEach(function(cell){
+      cell.addEventListener("input", function(){
+        var row = ptRows[kind].filter(function(r){ return r.id == cell.dataset.row; })[0];
+        if(row){ row[cell.dataset.field] = cell.textContent; ptSave(kind); }
+      });
+    });
+    wrap.querySelectorAll("[data-pt-del]").forEach(function(btn){
+      btn.addEventListener("click", function(){
+        var id = Number(btn.dataset.id);
+        ptRows[kind] = ptRows[kind].length > 1 ? ptRows[kind].filter(function(r){ return r.id !== id; }) : [ptEmptyRow(kind)];
+        ptSave(kind);
+        ptRender(kind);
+      });
+    });
+  }
+
+  document.querySelectorAll("[data-pt-add]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var kind = btn.dataset.ptAdd;
+      ptRows[kind].push(ptEmptyRow(kind));
+      ptSave(kind);
+      ptRender(kind);
+    });
+  });
+
+  document.querySelectorAll("[data-pt-export]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var kind = btn.dataset.ptExport;
+      var el = $("#pt-export-" + kind);
+      if(!window.html2canvas){ toast("Não foi possível carregar o exportador de imagem."); return; }
+      html2canvas(el, {
+        backgroundColor: "#ffffff",
+        scale: 3,
+        ignoreElements: function(node){ return node.hasAttribute && node.hasAttribute("data-html2canvas-ignore"); }
+      }).then(function(canvas){
+        var a = document.createElement("a");
+        a.href = canvas.toDataURL("image/png");
+        a.download = (kind === "recuperado" ? "material-recuperado" : "tabela-de-precos") + "-" + hoje() + ".png";
+        a.click();
+      });
+    });
+  });
+
   /* ---------- início ---------- */
   $("#emissao").value = hoje();
   regua();
   novoItem();
+  ptRender("padrao");
+  ptRender("recuperado");
 })();
 </script>
 </body>
