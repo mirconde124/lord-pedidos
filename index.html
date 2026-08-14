@@ -692,6 +692,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 <script>
 (function(){
   "use strict";
@@ -1064,16 +1065,44 @@
   $("#btn-gerar").addEventListener("click", gerar);
   $("#btn-gerar-mobile").addEventListener("click", gerar);
   $("#btn-voltar").addEventListener("click", voltar);
-  $("#btn-print").addEventListener("click", function(){ window.print(); });
+
+  function nomeArquivo(){
+    var sugestao = document.title;
+    var v = prompt("Nome do arquivo:", sugestao);
+    if(v === null) return null; // cancelou
+    v = v.trim().replace(/\.(pdf|png)$/i, "");
+    return v || sugestao;
+  }
+
   $("#btn-png").addEventListener("click", function(){
     var btn = this;
     if(!window.html2canvas){ toast("Não foi possível carregar o exportador de imagem."); return; }
+    var nome = nomeArquivo();
+    if(!nome) return;
     btn.disabled = true;
     html2canvas($("#sheet"), { backgroundColor: "#ffffff", scale: 3, useCORS: true }).then(function(canvas){
       var a = document.createElement("a");
       a.href = canvas.toDataURL("image/png");
-      a.download = document.title + ".png";
+      a.download = nome + ".png";
       a.click();
+    }).finally(function(){ btn.disabled = false; });
+  });
+
+  $("#btn-print").addEventListener("click", function(){
+    var btn = this;
+    if(!window.html2canvas || !window.jspdf){ toast("Não foi possível carregar o exportador de PDF."); return; }
+    var nome = nomeArquivo();
+    if(!nome) return;
+    btn.disabled = true;
+    html2canvas($("#sheet"), { backgroundColor: "#ffffff", scale: 3, useCORS: true }).then(function(canvas){
+      var pageW = 297, pageH = 210, margin = 3;
+      var pdf = new window.jspdf.jsPDF({ unit: "mm", format: "a4", orientation: "landscape", compress: true });
+      var availW = pageW - margin * 2, availH = pageH - margin * 2;
+      var ratio = Math.min(availW / canvas.width, availH / canvas.height);
+      var drawW = canvas.width * ratio, drawH = canvas.height * ratio;
+      var x = (pageW - drawW) / 2, y = (pageH - drawH) / 2;
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", x, y, drawW, drawH, undefined, "FAST");
+      pdf.save(nome + ".pdf");
     }).finally(function(){ btn.disabled = false; });
   });
 
