@@ -654,7 +654,7 @@
         <h2 class="pt-edit" contenteditable="true" id="pt-title-padrao" data-placeholder="Tabela de preços">Tabela de preços</h2>
         <p class="pt-edit" contenteditable="true" id="pt-sub-padrao" data-placeholder="Valores por material · R$ + IPI">Valores por material · R$ + IPI</p>
       </div>
-      <button type="button" class="btn primary" data-pt-export="padrao">
+      <button type="button" class="btn primary" data-pt-export="padrao" data-html2canvas-ignore="true">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
         Exportar PNG
       </button>
@@ -662,7 +662,7 @@
     <div class="pt-export" id="pt-export-padrao">
       <div class="pt-table" id="pt-table-padrao"></div>
     </div>
-    <button type="button" class="pt-add" data-pt-add="padrao">+ Adicionar material</button>
+    <button type="button" class="pt-add" data-pt-add="padrao" data-html2canvas-ignore="true">+ Adicionar material</button>
   </div>
 
   <div class="pt-card">
@@ -671,7 +671,7 @@
         <h2 class="pt-edit" contenteditable="true" id="pt-title-recuperado" data-placeholder="Material recuperado">Material recuperado</h2>
         <p class="pt-edit" contenteditable="true" id="pt-sub-recuperado" data-placeholder="Valores por material · R$ + IPI">Valores por material · R$ + IPI</p>
       </div>
-      <button type="button" class="btn primary" data-pt-export="recuperado">
+      <button type="button" class="btn primary" data-pt-export="recuperado" data-html2canvas-ignore="true">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
         Exportar PNG
       </button>
@@ -679,7 +679,7 @@
     <div class="pt-export" id="pt-export-recuperado">
       <div class="pt-table pt-table-2col" id="pt-table-recuperado"></div>
     </div>
-    <button type="button" class="pt-add" data-pt-add="recuperado">+ Adicionar material</button>
+    <button type="button" class="pt-add" data-pt-add="recuperado" data-html2canvas-ignore="true">+ Adicionar material</button>
   </div>
 </div>
 
@@ -1303,7 +1303,7 @@
   document.querySelectorAll("[data-pt-export]").forEach(function(btn){
     btn.addEventListener("click", function(){
       var kind = btn.dataset.ptExport;
-      var el = $("#pt-export-" + kind);
+      var el = btn.closest(".pt-card");
       if(!window.html2canvas){ toast("Não foi possível carregar o exportador de imagem."); return; }
       html2canvas(el, {
         backgroundColor: "#ffffff",
