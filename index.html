@@ -181,8 +181,13 @@
     background:#fff;border:1px solid var(--line);border-radius:12px;
     box-shadow:0 20px 40px -16px rgba(10,21,38,.4);padding:6px;
     max-height:280px;overflow-y:auto;display:none;
+    scrollbar-width:thin;scrollbar-color:var(--line) transparent;
   }
   .mat-select.open .mat-select-panel{display:block}
+  .mat-select-panel::-webkit-scrollbar{width:6px}
+  .mat-select-panel::-webkit-scrollbar-track{background:transparent}
+  .mat-select-panel::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+  .mat-select-panel::-webkit-scrollbar-thumb:hover{background:#BFCBDD}
   .mat-opt{
     display:block;width:100%;text-align:left;border:0;background:transparent;
     padding:9px 12px;border-radius:8px;font-size:14px;color:var(--text);
