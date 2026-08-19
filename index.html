@@ -170,6 +170,26 @@
   }
   .mat-top .control{flex:1}
   .mat-name{max-width:230px}
+  .mat-select{position:relative}
+  .mat-select-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left}
+  .mat-select-btn svg{flex:none;color:var(--muted);transition:transform .16s ease}
+  .mat-select.open .mat-select-btn{border-color:var(--blue-br);background:#fff;box-shadow:0 0 0 3px rgba(59,130,246,.16)}
+  .mat-select.open .mat-select-btn svg{transform:rotate(180deg)}
+  .mat-select-panel{
+    position:absolute;top:calc(100% + 6px);left:0;z-index:30;
+    width:max-content;min-width:100%;max-width:220px;
+    background:#fff;border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 20px 40px -16px rgba(10,21,38,.4);padding:6px;
+    max-height:280px;overflow-y:auto;display:none;
+  }
+  .mat-select.open .mat-select-panel{display:block}
+  .mat-opt{
+    display:block;width:100%;text-align:left;border:0;background:transparent;
+    padding:9px 12px;border-radius:8px;font-size:14px;color:var(--text);
+    cursor:pointer;transition:background .12s ease;
+  }
+  .mat-opt:hover{background:var(--paper)}
+  .mat-opt.sel{background:var(--blue-br);color:#fff;font-weight:600}
   .kill{
     border:1px solid var(--line);background:#fff;color:var(--muted);
     width:34px;height:34px;border-radius:9px;flex:none;display:grid;place-items:center;
@@ -398,6 +418,10 @@
   .pt-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 22px 0}
   .pt-head h2{margin:0;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.01em}
   .pt-head p{margin:4px 0 0;color:var(--muted);font-size:13px}
+  .pt-edit{outline:none;border-radius:8px;padding:2px 6px;margin-left:-6px;transition:background .14s ease}
+  .pt-edit:hover{background:var(--paper)}
+  .pt-edit:focus{background:#fff;box-shadow:0 0 0 3px rgba(59,130,246,.16)}
+  .pt-edit:empty:before{content:attr(data-placeholder);color:#9AA7BB}
   .pt-head .btn{padding:9px 16px;font-size:12.5px}
   .pt-export{padding:20px 22px 6px}
   .pt-table{border:1px solid var(--line);border-radius:12px;overflow:hidden}
@@ -406,12 +430,13 @@
   .pt-row.head{background:var(--paper);font-family:var(--display);font-weight:700;font-size:12px;letter-spacing:.04em}
   .pt-row.head > div{padding:11px 14px}
   .pt-row + .pt-row{border-top:1px solid var(--mist)}
+  .pt-cell-label{display:none}
   .pt-cell{
     padding:10px 12px;min-height:20px;outline:none;font-size:14.5px;
     border-radius:8px;transition:background .14s ease;
   }
-  .pt-cell:first-child{font-family:var(--display);font-weight:600}
-  .pt-cell:not(:first-child){font-family:var(--mono)}
+  .pt-cell-wrap:first-child .pt-cell{font-family:var(--display);font-weight:600}
+  .pt-cell-wrap:not(:first-child) .pt-cell{font-family:var(--mono)}
   .pt-cell:hover{background:var(--paper)}
   .pt-cell:focus{background:#fff;box-shadow:inset 0 0 0 2px var(--blue-br)}
   .pt-cell:empty:before{content:attr(data-placeholder);color:#9AA7BB;font-family:var(--body);font-weight:400}
@@ -446,9 +471,18 @@
     table{font-size:12px}
     thead th{font-size:9px}
     tbody td{font-size:12px}
-    .pt-row{grid-template-columns:1fr}
+    .pt-row{display:block;position:relative;padding:14px 46px 10px 14px}
     .pt-row.head{display:none}
-    .pt-table-2col .pt-row{grid-template-columns:1fr}
+    .pt-cell-wrap{padding:6px 0}
+    .pt-cell-label{
+      display:block;font-family:var(--display);font-weight:700;
+      font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;
+    }
+    .pt-cell{padding:0;border-radius:0}
+    .pt-row .kill{
+      position:absolute;top:12px;right:10px;border:1px solid var(--line);background:#fff;
+      width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0;
+    }
   }
   @media (prefers-reduced-motion:reduce){
     *{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -617,8 +651,8 @@
   <div class="pt-card">
     <div class="pt-head">
       <div>
-        <h2>Tabela de preços</h2>
-        <p>Valores por material · R$ + IPI</p>
+        <h2 class="pt-edit" contenteditable="true" id="pt-title-padrao" data-placeholder="Tabela de preços">Tabela de preços</h2>
+        <p class="pt-edit" contenteditable="true" id="pt-sub-padrao" data-placeholder="Valores por material · R$ + IPI">Valores por material · R$ + IPI</p>
       </div>
       <button type="button" class="btn primary" data-pt-export="padrao">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
@@ -634,8 +668,8 @@
   <div class="pt-card">
     <div class="pt-head">
       <div>
-        <h2>Material recuperado</h2>
-        <p>Valores por material · R$ + IPI</p>
+        <h2 class="pt-edit" contenteditable="true" id="pt-title-recuperado" data-placeholder="Material recuperado">Material recuperado</h2>
+        <p class="pt-edit" contenteditable="true" id="pt-sub-recuperado" data-placeholder="Valores por material · R$ + IPI">Valores por material · R$ + IPI</p>
       </div>
       <button type="button" class="btn primary" data-pt-export="recuperado">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
@@ -758,6 +792,12 @@
     return it.nome === "Outro" ? (it.livre || "Material") : it.nome;
   }
 
+  function fecharMatSelects(){
+    document.querySelectorAll(".mat-select.open").forEach(function(ms){ ms.classList.remove("open"); });
+  }
+  document.addEventListener("click", fecharMatSelects);
+  document.addEventListener("keydown", function(e){ if(e.key === "Escape") fecharMatSelects(); });
+
   function render(){
     var lista = $("#lista");
     lista.innerHTML = "";
@@ -768,9 +808,14 @@
       el.innerHTML =
         '<div class="mat-top">' +
           '<span class="mat-idx">' + (i+1) + '</span>' +
-          '<select class="control mat-name" data-f="nome">' +
-            MATERIAIS.map(function(m){ return '<option' + (m === it.nome ? ' selected' : '') + '>' + m + '</option>'; }).join("") +
-          '</select>' +
+          '<div class="mat-select mat-name">' +
+            '<button type="button" class="control mat-select-btn" data-mat-toggle><span>' + esc(it.nome) + '</span>' +
+              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l7 7 7-7"/></svg>' +
+            '</button>' +
+            '<div class="mat-select-panel" role="listbox">' +
+              MATERIAIS.map(function(m){ return '<button type="button" class="mat-opt' + (m === it.nome ? ' sel' : '') + '" data-val="' + esc(m) + '" role="option">' + esc(m) + '</button>'; }).join("") +
+            '</div>' +
+          '</div>' +
           (it.nome === "Outro" ? '<input class="control" data-f="livre" placeholder="Nome do material" value="' + esc(it.livre) + '">' : '') +
           '<input class="control" data-f="cod" placeholder="Código interno (opcional)" value="' + esc(it.cod) + '">' +
           '<button type="button" class="kill" data-dup title="Duplicar material" aria-label="Duplicar material ' + (i+1) + '">' +
@@ -796,11 +841,21 @@
       el.querySelectorAll("[data-f]").forEach(function(inp){
         inp.addEventListener("input", function(){
           it[inp.dataset.f] = inp.value;
-          if(inp.dataset.f === "nome") render(); else atualiza(el, it);
+          atualiza(el, it);
         });
-        inp.addEventListener("change", function(){
-          it[inp.dataset.f] = inp.value;
-          if(inp.dataset.f === "nome") render();
+      });
+      var matSelect = el.querySelector(".mat-select");
+      matSelect.querySelector("[data-mat-toggle]").addEventListener("click", function(e){
+        e.stopPropagation();
+        var wasOpen = matSelect.classList.contains("open");
+        fecharMatSelects();
+        if(!wasOpen) matSelect.classList.add("open");
+      });
+      matSelect.querySelectorAll(".mat-opt").forEach(function(opt){
+        opt.addEventListener("click", function(e){
+          e.stopPropagation();
+          it.nome = opt.dataset.val;
+          render();
         });
       });
       el.querySelector("[data-dup]").addEventListener("click", function(){
@@ -1189,8 +1244,18 @@
   var ptRows = { padrao: ptLoad("padrao"), recuperado: ptLoad("recuperado") };
   function ptSave(kind){ localStorage.setItem(PT_KEYS[kind], JSON.stringify(ptRows[kind])); }
 
-  function ptCell(row, field, placeholder){
-    return '<div class="pt-cell" contenteditable="true" data-row="' + row.id + '" data-field="' + field + '" data-placeholder="' + placeholder + '">' + esc(row[field] || "") + '</div>';
+  function ptEditableInit(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    var key = "lord_pt_text_" + id;
+    var saved = localStorage.getItem(key);
+    if(saved !== null) el.textContent = saved;
+    el.addEventListener("input", function(){ localStorage.setItem(key, el.textContent); });
+  }
+
+  function ptCell(row, field, label, placeholder){
+    return '<div class="pt-cell-wrap"><span class="pt-cell-label">' + label + '</span>' +
+      '<div class="pt-cell" contenteditable="true" data-row="' + row.id + '" data-field="' + field + '" data-placeholder="' + placeholder + '">' + esc(row[field] || "") + '</div></div>';
   }
 
   function ptRender(kind){
@@ -1201,8 +1266,8 @@
       : '<div class="pt-row head"><div>Material</div><div>Nacional</div><div>Importado</div><div></div></div>';
     var body = rows.map(function(r){
       var cells = kind === "recuperado"
-        ? ptCell(r, "material", "Material") + ptCell(r, "preco", "R$ 0,00 + IPI")
-        : ptCell(r, "material", "Material") + ptCell(r, "nacional", "R$ 0,00 + IPI") + ptCell(r, "importado", "—");
+        ? ptCell(r, "material", "Material", "Material") + ptCell(r, "preco", "Preço", "R$ 0,00 + IPI")
+        : ptCell(r, "material", "Material", "Material") + ptCell(r, "nacional", "Nacional", "R$ 0,00 + IPI") + ptCell(r, "importado", "Importado", "—");
       return '<div class="pt-row">' + cells +
         '<button type="button" class="kill" data-pt-del="' + kind + '" data-id="' + r.id + '" data-html2canvas-ignore="true" title="Remover material" aria-label="Remover material">' +
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>' +
@@ -1259,6 +1324,7 @@
   novoItem();
   ptRender("padrao");
   ptRender("recuperado");
+  ["pt-title-padrao","pt-sub-padrao","pt-title-recuperado","pt-sub-recuperado"].forEach(ptEditableInit);
 })();
 </script>
 </body>
