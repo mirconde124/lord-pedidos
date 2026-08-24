@@ -176,14 +176,14 @@
   .mat-select.open .mat-select-btn{border-color:var(--blue-br);background:#fff;box-shadow:0 0 0 3px rgba(59,130,246,.16)}
   .mat-select.open .mat-select-btn svg{transform:rotate(180deg)}
   .mat-select-panel{
-    position:absolute;top:calc(100% + 6px);left:0;z-index:30;
-    width:max-content;min-width:100%;max-width:220px;
+    position:fixed;z-index:9999;
+    width:max-content;max-width:220px;
     background:#fff;border:1px solid var(--line);border-radius:12px;
     box-shadow:0 20px 40px -16px rgba(10,21,38,.4);padding:6px;
-    max-height:min(80vh, 620px);overflow-y:auto;display:none;
+    max-height:300px;overflow-y:auto;display:none;
     scrollbar-width:thin;scrollbar-color:var(--line) transparent;
   }
-  .mat-select.open .mat-select-panel{display:block}
+  .mat-select-panel.open{display:block}
   .mat-select-panel::-webkit-scrollbar{width:6px}
   .mat-select-panel::-webkit-scrollbar-track{background:transparent}
   .mat-select-panel::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
@@ -799,9 +799,31 @@
 
   function fecharMatSelects(){
     document.querySelectorAll(".mat-select.open").forEach(function(ms){ ms.classList.remove("open"); });
+    document.querySelectorAll(".mat-select-panel.open").forEach(function(p){ p.classList.remove("open"); p.remove(); });
+  }
+  function abrirMatSelect(matSelect, matBtn, panel){
+    var r = matBtn.getBoundingClientRect();
+    document.body.appendChild(panel); // sai de qualquer ancestral com overflow:hidden
+    panel.classList.add("open");
+    panel.style.minWidth = r.width + "px";
+    var maxH = Math.min(300, window.innerHeight - 16);
+    panel.style.maxHeight = maxH + "px";
+    var spaceBelow = window.innerHeight - r.bottom - 8;
+    var abrirParaCima = spaceBelow < Math.min(maxH, panel.scrollHeight) && r.top > spaceBelow;
+    if(abrirParaCima){
+      panel.style.top = "";
+      panel.style.bottom = (window.innerHeight - r.top + 6) + "px";
+    } else {
+      panel.style.bottom = "";
+      panel.style.top = (r.bottom + 6) + "px";
+    }
+    panel.style.left = Math.min(r.left, window.innerWidth - panel.offsetWidth - 12) + "px";
+    matSelect.classList.add("open");
   }
   document.addEventListener("click", fecharMatSelects);
   document.addEventListener("keydown", function(e){ if(e.key === "Escape") fecharMatSelects(); });
+  window.addEventListener("scroll", fecharMatSelects, true);
+  window.addEventListener("resize", fecharMatSelects);
 
   function render(){
     var lista = $("#lista");
@@ -850,16 +872,19 @@
         });
       });
       var matSelect = el.querySelector(".mat-select");
-      matSelect.querySelector("[data-mat-toggle]").addEventListener("click", function(e){
+      var matBtn = matSelect.querySelector("[data-mat-toggle]");
+      var matPanel = matSelect.querySelector(".mat-select-panel");
+      matBtn.addEventListener("click", function(e){
         e.stopPropagation();
-        var wasOpen = matSelect.classList.contains("open");
+        var wasOpen = matPanel.classList.contains("open");
         fecharMatSelects();
-        if(!wasOpen) matSelect.classList.add("open");
+        if(!wasOpen) abrirMatSelect(matSelect, matBtn, matPanel);
       });
       matSelect.querySelectorAll(".mat-opt").forEach(function(opt){
         opt.addEventListener("click", function(e){
           e.stopPropagation();
           it.nome = opt.dataset.val;
+          fecharMatSelects();
           render();
         });
       });
